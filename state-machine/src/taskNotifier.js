@@ -1,7 +1,7 @@
 const defaultSqsClient = require('./aws').sqs;
 
 async function taskNotifier(stack, stateMachine, sqsClient = defaultSqsClient) {
-    const tasks = stack.getRequirements();
+    const tasks = stack.getTasks();
     for (let i = 0; i < tasks.length; i++) {
         await sendMessage(
             {

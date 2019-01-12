@@ -32,7 +32,7 @@ async function eventHandler(
 
     switch (event.action) {
         case 'TASK_COMPLETED':
-            machine.satisfyRequirement(stack, event.requirement.name);
+            machine.satisfyTask(stack, event.requirement.name);
             break;
         default:
             machine.processAction(stack, event.action);
@@ -41,7 +41,7 @@ async function eventHandler(
 
     await repo.saveStack(stack);
 
-    if (stack.state !== initialState && stack.hasRequirements())
+    if (stack.state !== initialState && !stack.isSatisfied())
         await taskNotifier(stack, machine);
 
     if (stack.isSatisfied() && machine.isTerminalState(stack.state))
