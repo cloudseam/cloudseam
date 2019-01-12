@@ -1,0 +1,76 @@
+version: "3.7"
+
+services:
+  proxy:
+    image: traefik
+    command: --api --docker
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  machine:
+    image: node:10
+    command: sh -c "yarn install && yarn run dev"
+    working_dir: /app
+    volumes:
+      - ./state-machine/package.json:/app/package.json:cached
+      - ./state-machine/yarn.lock:/app/yarn.lock:cached
+      - ./state-machine/src:/app/src:cached
+      - ./state-machine/spec:/app/spec:cached
+      - ./state-machine/node_modules:/app/node_modules:cached
+      - ./state-machine/machines:/machines
+    environment:
+      MACHINE_LOCATOR: LOCAL_FS
+      MACHINE_SPEC_DIR: /machines
+      LOCAL_MODE: "true"
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: dummy-key
+      AWS_SECRET_ACCESS_KEY: dummy-secret-key
+      SQS_EVENT_QUEUE_URL: http://sqs:9324/queue/stack-events
+      SQS_TASK_QUEUE_URL: http://sqs:9324/queue/stack-tasks
+  
+  satisfier:
+    image: node:8.10
+    command: sh -c "yarn install && yarn run dev"
+    working_dir: /app
+    volumes:
+      - ./task-satisfier/package.json:/app/package.json
+      - ./task-satisfier/yarn.lock:/app/yarn.lock
+      - ./task-satisfier/src:/app/src:cached
+      - ./task-satisfier/spec:/app/spec:cached
+    environment:
+      LOCAL_MODE: "true"
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: dummy-key
+      AWS_SECRET_ACCESS_KEY: dummy-secret-key
+      SQS_EVENT_QUEUE_URL: http://sqs:9324/queue/stack-events
+      SQS_TASK_QUEUE_URL: http://sqs:9324/queue/stack-tasks
+
+  db:
+    image: postgres:9.5
+    environment:
+      POSTGRES_PASSWORD: summit
+      POSTGRES_USER: summit
+      POSTGRES_DB: summit
+
+  sqs:
+    image: softwaremill/elasticmq
+    ports:
+      - 9324:9324
+    volumes:
+      - ./local-sqs/elasticmq.conf:/opt/elasticmq.conf
+
+  sqs-gui:
+    image: node:8.10
+    command: /app/run.sh
+    working_dir: /app
+    volumes:
+      - ./local-sqs/run.sh:/app/run.sh
+      - ./local-sqs/gui-config.json:/app/gui-config.json
+    labels:
+      traefik.backend: sqs-gui
+      traefik.frontend.priority: 10
+      traefik.frontend.rule: Host:sqs.localhost
+      traefik.port: 3000

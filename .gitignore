@@ -1,0 +1,8 @@
+*.tfstate
+*.tfstate*
+node_modules
+.DS_Store
+.terraform
+.idea
+*.iml
+npm-debug.log

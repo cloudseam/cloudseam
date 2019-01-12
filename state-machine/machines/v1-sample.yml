@@ -1,0 +1,57 @@
+version: 1
+
+events:
+  - LAUNCH
+  - ACCESS
+  - DESTROY
+
+x-sharedEventListeners: &sharedEventListeners
+  ACCESS:
+    - action: no-op
+  DESTROY:
+    - action: advance
+      state: DESTROY
+
+states:
+  INIT:
+    on:
+      LAUNCH:
+        - action: advance
+          state: PROVISION
+
+  PROVISION:
+    tasks:
+      - create-files
+    on:
+      NEXT:
+        - action: advance
+          state: RUN
+      <<: *sharedEventListeners
+  
+  RUN: 
+    on:
+      <<: *sharedEventListeners
+  
+  DESTROY:
+    terminal: true
+    tasks:
+      - nuke-files
+
+tasks:
+  create-files:
+    executor: terraform
+    config:
+      source:
+        type: s3
+        bucket: summit-terraform-scripts
+        key: test/s3-file
+      action: apply
+
+  nuke-files:
+    executor: terraform
+    config:
+      source:
+        type: s3
+        bucket: summit-terraform-scripts
+        key: test/s3-file
+      action: destroy

@@ -1,0 +1,30 @@
+{
+    "port": 3000,
+    "rememberMessages": 100,
+    "endpoints": [
+        {
+            "key": "notValidKey",
+            "secretKey": "notValidSecret",
+            "region": "us-east-1",
+            "url": "http://sqs:9324/queue/events-replica"
+        },
+        {
+            "key": "notValidKey",
+            "secretKey": "notValidSecret",
+            "region": "us-east-1",
+            "url": "http://sqs:9324/queue/tasks-replica"
+        },
+        {
+            "key": "notValidKey",
+            "secretKey": "notValidSecret",
+            "region": "us-east-1",
+            "url": "http://sqs:9324/queue/event-dead-letters"
+        },
+        {
+            "key": "notValidKey",
+            "secretKey": "notValidSecret",
+            "region": "us-east-1",
+            "url": "http://sqs:9324/queue/task-dead-letters"
+        }
+    ]
+}
