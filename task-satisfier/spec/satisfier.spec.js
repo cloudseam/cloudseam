@@ -22,7 +22,7 @@ describe('satisfier', () => {
         stack = { id: 'stack-123' };
     });
 
-    it('throws if requirement has no task handler', async () => {
+    it('throws if task has no task handler', async () => {
         try {
             await satisfier(stack, 'unknown', availableTasks);
             fail('Should have thrown');
@@ -39,7 +39,7 @@ describe('satisfier', () => {
         expect(availableTasks[0].action).toHaveBeenCalledWith(stack);
         expect(sqsClient.sendMessage).toHaveBeenCalledWith({
             action: 'SATISFY_REQ',
-            requirement: 'req1',
+            task: { name: 'req1' },
             stackId: stack.id,
         });
     });

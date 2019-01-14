@@ -10,7 +10,7 @@ const Stack = require('./stack');
  *   action: "LAUNCH",
  *   stackId: "crest-1234",
  *   machine: "qa",
- *   requirement : "ecs-setup" // Only when action is SATISFY_REQUIREMENT
+ *   task : { name : "ecs-setup", config : {}} // Only when action is TASK_COMPLETED
  * }
  */
 async function eventHandler(
@@ -32,7 +32,7 @@ async function eventHandler(
 
     switch (event.action) {
         case 'TASK_COMPLETED':
-            machine.satisfyTask(stack, event.requirement.name);
+            machine.satisfyTask(stack, event.task.name);
             break;
         default:
             machine.processAction(stack, event.action);

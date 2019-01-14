@@ -9,7 +9,7 @@ const process = require('process');
  * the script. Example { slug : 't-1234' } will add a `var='slug=t-1234'` flag
  * to the TF command
  */
-async function terraformExecutor(stack, requirement) {
+async function terraformExecutor(stack, task) {
     const tmpDir = tmp.dirSync({ unsafeCleanup: true });
     const workDir = tmpDir.name;
 
@@ -17,15 +17,15 @@ async function terraformExecutor(stack, requirement) {
         return new Promise(acc => setTimeout(acc, Math.random() * 1000 + 3000));
 
     const stackMetadata = stack.metadata || {};
-    const requirementVariables = requirement.config.variables || {};
+    const taskVariables = task.config.variables || {};
 
-    const additionalVars = { ...stackMetadata, ...requirementVariables };
+    const additionalVars = { ...stackMetadata, ...taskVariables };
 
     return Promise.all([
-        getSourceFromS3(requirement.config.source, workDir),
+        getSourceFromS3(task.config.source, workDir),
         copyTerraformBinary(workDir),
     ])
-        .then(() => init(workDir, stack, requirement))
+        .then(() => init(workDir, stack, task))
         .then(() => run(workDir, action, stack.id, additionalVars))
         .then(() => tmpDir.removeCallback())
         .catch(e => {
@@ -74,7 +74,7 @@ async function copyTerraformBinary(workDir) {
     });
 }
 
-async function init(workDir, stack, requirement) {
+async function init(workDir, stack, task) {
     return new Promise((accept, reject) => {
         log('Initializing Terraform');
 
@@ -83,7 +83,7 @@ async function init(workDir, stack, requirement) {
             [
                 'init',
                 `-backend-config="key=${stack.machine}/${stack.id}/${
-                    requirement.name
+                    task.name
                 }"`,
                 workDir,
             ],
