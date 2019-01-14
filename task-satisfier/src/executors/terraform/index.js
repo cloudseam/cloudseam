@@ -1,6 +1,8 @@
 const tmp = require('tmp');
+const fs = require('fs');
 const { spawn } = require('child_process');
 const process = require('process');
+const { s3 } = require('../../aws');
 
 /**
  * Launch a Terraform script!
@@ -13,25 +15,30 @@ async function terraformExecutor(stack, task) {
     const tmpDir = tmp.dirSync({ unsafeCleanup: true });
     const workDir = tmpDir.name;
 
-    if (process.env.LOCAL_MODE)
-        return new Promise(acc => setTimeout(acc, Math.random() * 1000 + 3000));
-
     const stackMetadata = stack.metadata || {};
     const taskVariables = task.config.variables || {};
 
     const additionalVars = { ...stackMetadata, ...taskVariables };
 
     return Promise.all([
-        getSourceFromS3(task.config.source, workDir),
+        copySourcesFiles(task.config.source, workDir),
         copyTerraformBinary(workDir),
     ])
         .then(() => init(workDir, stack, task))
-        .then(() => run(workDir, action, stack.id, additionalVars))
+        .then(() => run(workDir, task.config.action, stack.id, additionalVars))
         .then(() => tmpDir.removeCallback())
         .catch(e => {
             tmpDir.removeCallback();
             throw e;
         });
+}
+
+async function copySourcesFiles(sourceConfig, workDir) {
+    if (sourceConfig.type === 's3')
+        return getSourceFromS3(sourceConfig, workDir);
+    else if (sourceConfig.type === 'local')
+        return copyLocalFiles(sourceConfig, workDir);
+    throw new Error(`Unsupported source type: ${sourceConfig.type}`);
 }
 
 async function getSourceFromS3(sourceConfig, workDir) {
@@ -63,10 +70,21 @@ async function getSourceFromS3(sourceConfig, workDir) {
     }
 }
 
+async function copyLocalFiles(sourceConfig, workDir) {
+    log(`Copying local files from ${sourceConfig.location} to ${workDir}`);
+    return copyFiles(sourceConfig.location, workDir, workDir);
+}
+
 async function copyTerraformBinary(workDir) {
+    log('Placing Terraform binary into /tmp/');
+    if (fs.existsSync('/tmp/terraform')) return;
+
+    return copyFiles(`${__dirname}/bin/terraform`, '/tmp/', workDir);
+}
+
+async function copyFiles(source, target, workDir) {
     return new Promise((accept, reject) => {
-        log('Placing Terraform binary into /tmp/');
-        const cmd = spawn('cp', ['-v', `${__dirname}/bin/terraform`, '/tmp/'], {
+        const cmd = spawn('cp', ['-rv', source, target], {
             shell: true,
             cwd: workDir,
         });
