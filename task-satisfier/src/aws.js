@@ -9,4 +9,5 @@ AWS.config.sqs = {
 module.exports = {
     sqsClient: new AWS.SQS(),
     s3: new AWS.S3(),
+    lambda: new AWS.Lambda(),
 };
