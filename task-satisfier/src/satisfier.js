@@ -5,7 +5,9 @@ async function satisfier(stack, task, executors = defaultExecutors) {
 
     if (executors[task.executor] === undefined) {
         throw new Error(
-            `Unable to satisfy task. Executor ${task.executor} not recognized`,
+            `Unable to satisfy task. Executor '${
+                task.executor
+            }' not recognized`,
         );
     }
 

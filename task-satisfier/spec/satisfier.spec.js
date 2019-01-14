@@ -1,46 +1,39 @@
 const satisfier = require('../src/satisfier');
 
 describe('satisfier', () => {
-    let availableTasks, stack, sqsClient;
+    let executors, stack, task;
 
     beforeEach(() => {
-        availableTasks = [
-            {
-                name: 'req1',
-                action: jasmine
-                    .createSpy('req1.action')
-                    .and.returnValue(Promise.resolve()),
-            },
-        ];
-
-        sqsClient = {
-            sendMessage: jasmine
-                .createSpy('sendMessage')
-                .and.returnValue(Promise.resolve()),
+        executors = {
+            terraform: jasmine
+                .createSpy('executors.terraform')
+                .and.callFake(() => Promise.resolve()),
         };
 
         stack = { id: 'stack-123' };
+
+        task = {
+            name: 'sample-task',
+            executor: 'terraform',
+        };
     });
 
-    it('throws if task has no task handler', async () => {
+    it('throws if task has unknown executor', async () => {
+        task.executor = 'unknown';
+
         try {
-            await satisfier(stack, 'unknown', availableTasks);
+            await satisfier(stack, task, executors);
             fail('Should have thrown');
         } catch (err) {
             expect(err.message).toContain(
-                "Unable to find handler for 'unknown'",
+                "Unable to satisfy task. Executor 'unknown' not recognized",
             );
         }
     });
 
     it('fires action and sends message afterwards', async () => {
-        await satisfier(stack, 'req1', availableTasks, sqsClient);
+        await satisfier(stack, task, executors);
 
-        expect(availableTasks[0].action).toHaveBeenCalledWith(stack);
-        expect(sqsClient.sendMessage).toHaveBeenCalledWith({
-            action: 'SATISFY_REQ',
-            task: { name: 'req1' },
-            stackId: stack.id,
-        });
+        expect(executors.terraform).toHaveBeenCalledWith(stack, task);
     });
 });
