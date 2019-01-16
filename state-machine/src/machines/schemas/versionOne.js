@@ -59,11 +59,17 @@ async function versionOneSchemaValidator(machineData) {
     const terraformTaskSchema = Joi.object().keys({
         executor: Joi.string().valid('terraform'),
         config: Joi.object({
-            source: Joi.object({
-                type: Joi.string().valid('s3'),
-                bucket: Joi.string().required(),
-                key: Joi.string().required(),
-            }).required(),
+            source: Joi.alternatives().try(
+                Joi.object({
+                    type: Joi.string().valid('s3'),
+                    bucket: Joi.string().required(),
+                    key: Joi.string().required(),
+                }).required(),
+                Joi.object({
+                    type: Joi.string().valid('local'),
+                    location: Joi.string().required(),
+                }).required(),
+            ),
             action: Joi.valid('apply', 'destroy').required(),
             variables: Joi.object().optional(),
         }),

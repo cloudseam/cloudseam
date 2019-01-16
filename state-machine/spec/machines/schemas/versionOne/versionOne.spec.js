@@ -211,6 +211,21 @@ describe('versionOne schema', () => {
                 '"action" must be one of [apply, destroy]',
             );
         });
+
+        it('allows local source type', async () => {
+            terraformTask.config.source = { type: 'local', location: '' };
+
+            const result = await schemaValidator(machineData);
+            expect(result.error).toBe(null);
+        });
+
+        it('requires a location on the local source type', async () => {
+            terraformTask.config.source = { type: 'local' };
+
+            const result = await schemaValidator(machineData);
+            expect(result.error).not.toBe(null);
+            expect(result.error.message).toContain('asdf');
+        });
     });
 
     describe('lambda tasks', () => {
