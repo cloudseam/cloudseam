@@ -29,8 +29,8 @@ class PostgresStackRepo {
         await this.pgClientFactory.withClient(
             async client =>
                 await client.query(
-                    'INSERT INTO stacks (id, machine, data) VALUES ($1, $2, $3) ON CONFLICT(id) DO UPDATE SET data=$3',
-                    [stack.id, stack.machine, JSON.stringify(stack)],
+                    'INSERT INTO stacks (id, data, creation_time, last_updated_time) VALUES ($1, $2, $3, $3) ON CONFLICT(id) DO UPDATE SET data=$2, last_updated_time=$3',
+                    [stack.id, JSON.stringify(stack), new Date()],
                 ),
         );
     }
@@ -48,7 +48,7 @@ class PostgresStackRepo {
             );
             if (result.rows[0].name !== 'stacks') {
                 return client.query(
-                    'CREATE TABLE "stacks" ("id" VARCHAR(30) NOT NULL UNIQUE, "machine" VARCHAR(30) NOT NULL, "data" TEXT NOT NULL, CONSTRAINT stacks_pk PRIMARY KEY ("id"))',
+                    'CREATE TABLE "stacks" ("id" VARCHAR(30) NOT NULL UNIQUE, "data" TEXT NOT NULL, creation_time TIMESTAMP NOT NULL, last_updated_time TIMESTAMP NOT NULL, CONSTRAINT stacks_pk PRIMARY KEY ("id"))',
                 );
             }
         });
