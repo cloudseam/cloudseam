@@ -59,7 +59,7 @@ class Stack {
         if (metadata === undefined) return;
 
         const subObject = Object.keys(metadata).find(
-            key => typeof metadata[key] === 'object',
+            key => typeof metadata[key] === 'object' && metadata[key] !== null,
         );
         if (subObject !== undefined)
             throw new Error(`Provided metadata must be a flat object`);
