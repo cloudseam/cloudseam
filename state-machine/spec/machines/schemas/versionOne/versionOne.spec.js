@@ -213,7 +213,11 @@ describe('versionOne schema', () => {
         });
 
         it('allows local source type', async () => {
-            terraformTask.config.source = { type: 'local', location: '' };
+            terraformTask.config.source = {
+                type: 'local',
+                location: 'location',
+            };
+            machineData.tasks.test = terraformTask;
 
             const result = await schemaValidator(machineData);
             expect(result.error).toBe(null);
@@ -221,10 +225,11 @@ describe('versionOne schema', () => {
 
         it('requires a location on the local source type', async () => {
             terraformTask.config.source = { type: 'local' };
+            machineData.tasks.test = terraformTask;
 
             const result = await schemaValidator(machineData);
             expect(result.error).not.toBe(null);
-            expect(result.error.message).toContain('asdf');
+            expect(result.error.message).toContain('"location" is required');
         });
     });
 
