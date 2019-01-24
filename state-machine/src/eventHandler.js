@@ -49,7 +49,7 @@ async function eventHandler(
     await repo.saveStack(stack);
 
     if (stack.state !== initialState && !stack.isSatisfied())
-        await taskNotifier(stack, machine);
+        await taskNotifier(stack, machine, t => t.status === 'PENDING');
 
     if (stack.isSatisfied() && machine.isTerminalState(stack.state))
         await repo.removeStack(stack);
