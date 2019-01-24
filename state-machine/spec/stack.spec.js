@@ -152,5 +152,24 @@ describe('Stack', () => {
                 expect(err.message).toContain("Task 'req1' already defined");
             }
         });
+
+        it('handles errors correctly', () => {
+            stack.addTask('req1');
+
+            stack.indicateTaskFailure('req1', 'An error occurred');
+
+            expect(stack.tasks[0].errorMessage).toBe('An error occurred');
+            expect(stack.getTasks().length).toBe(1);
+        });
+
+        it('handles errors correctly', () => {
+            stack.addTask('req1');
+
+            stack.indicateTaskFailure('req1', 'An error occurred');
+            stack.satisfyTask('req1');
+
+            expect(stack.tasks[0].errorMessage).toBe(undefined);
+            expect(stack.getTasks().length).toBe(0);
+        });
     });
 });
