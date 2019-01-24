@@ -11,11 +11,7 @@ async function eventHandler(
         return responseSender.sendSuccess(event.stack.id, event.task);
     } catch (err) {
         console.error(err);
-        return responseSender.sendError(
-            event.stack.id,
-            event.task,
-            err.message,
-        );
+        return responseSender.sendError(event.stack.id, event.task, err.stack);
     }
 }
 

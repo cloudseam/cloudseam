@@ -94,17 +94,12 @@ async function copyFiles(source, target, workDir) {
 
 async function init(workDir, stack, task) {
     return new Promise((accept, reject) => {
-        log('Initializing Terraform');
+        const key = `${stack.machine}/${stack.id}/${task.config.source.key}`;
+        log(`Initializing Terraform using backend config key=${key}`);
 
         const cmd = spawn(
             '/tmp/terraform',
-            [
-                'init',
-                `-backend-config="key=${stack.machine}/${stack.id}/${
-                    task.name
-                }"`,
-                workDir,
-            ],
+            ['init', `-backend-config="key=${key}"`, workDir],
             { shell: true, cwd: workDir },
         );
         cmd.stdout.on('data', data => log(data.toString()));
@@ -118,7 +113,12 @@ async function init(workDir, stack, task) {
 
 async function run(workDir, action, stackId, additionalVariables) {
     return new Promise((accept, reject) => {
-        let options = [action, `-var='stack_id=${stackId}'`, '-auto-approve'];
+        let options = [
+            action,
+            `-var='stack_id=${stackId}'`,
+            '-input=false',
+            '-auto-approve',
+        ];
 
         if (additionalVariables) {
             Object.keys(additionalVariables).forEach(key => {
