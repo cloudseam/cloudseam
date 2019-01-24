@@ -11,4 +11,5 @@ const sqs = new AWS.SQS({
 module.exports = {
     secretsManager,
     sqs,
+    s3: new AWS.S3(),
 };

@@ -12,6 +12,10 @@ switch (process.env.MACHINE_LOCATOR) {
         console.log('Using local machine locator');
         machineRetriever = require('./localRetriever');
         break;
+    case 'S3':
+        console.log('Using s3 machine locator');
+        machineRetriever = require('./s3Retriever');
+        break;
     default:
         throw new Error(
             `Unrecognized MACHINE_LOCATOR: ${process.env.MACHINE_LOCATOR}`,

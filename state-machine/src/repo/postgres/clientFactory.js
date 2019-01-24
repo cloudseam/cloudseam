@@ -48,8 +48,11 @@ async function getConfig() {
         `Using credentials from ${process.env.POSTGRES_CONNECTION_SECRET}`,
     );
     const secretData = await secretsManager
-        .getSecretValue(process.env.POSTGRES_CONNECTION_SECRET)
+        .getSecretValue({
+            SecretId: process.env.POSTGRES_CONNECTION_SECRET,
+        })
         .promise();
+    console.log('Credentials loaded');
     return JSON.parse(secretData.SecretString);
 }
 
