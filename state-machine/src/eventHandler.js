@@ -41,6 +41,10 @@ async function eventHandler(
                 event.description,
             );
             break;
+        case 'RETRY_FAILED_TASKS':
+            await taskNotifier(stack, machine, t => t.status === 'ERROR');
+            stack.resetFailedTasks();
+            break;
         default:
             machine.processAction(stack, event.action);
             break;

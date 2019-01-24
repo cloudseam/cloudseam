@@ -91,6 +91,17 @@ class Stack {
             .map(r => r.name);
     }
 
+    resetFailedTasks() {
+        this.tasks = this.tasks.map(t =>
+            t.status === TaskStatus.ERROR
+                ? Object.assign({}, t, {
+                      status: TaskStatus.PENDING,
+                      errorMessage: undefined,
+                  })
+                : t,
+        );
+    }
+
     addMetadata(metadata) {
         if (metadata === undefined) return;
 

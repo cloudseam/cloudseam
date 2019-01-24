@@ -173,5 +173,16 @@ describe('Stack', () => {
             expect(stack.getTasks().length).toBe(0);
             expect(stack.hasError()).toBe(false);
         });
+
+        it('resets failed tasks correctly', () => {
+            stack.addTask('req1');
+
+            stack.indicateTaskFailure('req1', 'An error occurred');
+            stack.resetFailedTasks();
+
+            expect(stack.hasError()).toBe(false);
+            expect(stack.tasks[0].status).toBe('PENDING');
+            expect(stack.tasks[0].errorMessage).toBe(undefined);
+        });
     });
 });
