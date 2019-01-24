@@ -160,6 +160,7 @@ describe('Stack', () => {
 
             expect(stack.tasks[0].errorMessage).toBe('An error occurred');
             expect(stack.getTasks().length).toBe(1);
+            expect(stack.hasError()).toBe(true);
         });
 
         it('handles errors correctly', () => {
@@ -170,6 +171,7 @@ describe('Stack', () => {
 
             expect(stack.tasks[0].errorMessage).toBe(undefined);
             expect(stack.getTasks().length).toBe(0);
+            expect(stack.hasError()).toBe(false);
         });
     });
 });

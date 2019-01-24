@@ -49,4 +49,18 @@ describe('StateMachine', () => {
         expect(stack.isSatisfied()).toBe(false);
         expect(stack.hasTask('launch-tasks')).toBe(true);
     });
+
+    it('indicates task failures correctly', () => {
+        stateMachine.processAction(stack, 'LAUNCH');
+
+        stateMachine.indicateTaskFailure(
+            stack,
+            config.states.PROVISION.tasks[0],
+            'An error',
+        );
+
+        expect(stack.state).toBe('PROVISION');
+        expect(stack.isSatisfied()).toBe(false);
+        expect(stack.hasError()).toBe(true);
+    });
 });

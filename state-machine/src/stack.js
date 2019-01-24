@@ -25,6 +25,10 @@ class Stack {
         );
     }
 
+    hasError() {
+        return this.tasks.filter(r => r.status === TaskStatus.ERROR).length > 0;
+    }
+
     addTask(name) {
         if (this.tasks.find(r => r.name === name) !== undefined)
             throw new Error(`Task '${name}' already defined`);

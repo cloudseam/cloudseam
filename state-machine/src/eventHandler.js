@@ -34,6 +34,13 @@ async function eventHandler(
         case 'TASK_COMPLETED':
             machine.satisfyTask(stack, event.task.name);
             break;
+        case 'TASK_ERROR':
+            machine.indicateTaskFailure(
+                stack,
+                event.task.name,
+                event.description,
+            );
+            break;
         default:
             machine.processAction(stack, event.action);
             break;

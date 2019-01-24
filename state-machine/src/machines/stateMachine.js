@@ -39,6 +39,15 @@ class StateMachine {
         }
     }
 
+    indicateTaskFailure(stack, taskName, errorDescription) {
+        console.log(
+            `Indicating task ${taskName} failure for stack ${
+                stack.id
+            } with error: ${errorDescription}`,
+        );
+        stack.indicateTaskFailure(taskName, errorDescription);
+    }
+
     getTask(taskName) {
         return this.taskConfig[taskName];
     }
