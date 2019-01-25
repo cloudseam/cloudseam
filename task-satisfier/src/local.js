@@ -1,6 +1,10 @@
 const { sqsClient, s3 } = require('./aws');
 const lambdaHandler = require('./').lambdaHandler;
 
+if (process.env.SQS_TASK_QUEUE_URL === undefined) {
+    throw new Error(`SQS_TASK_QUEUE_URL env variable not defined!`);
+}
+
 async function run() {
     try {
         const message = await getMessage();
@@ -12,10 +16,10 @@ async function run() {
         };
         await lambdaHandler(lambdaMock);
         await deleteMessage(message.Messages[0].ReceiptHandle);
+
+        setTimeout(() => run(), 1000);
     } catch (err) {
         console.error(err);
-    } finally {
-        setTimeout(() => run(), 1000);
     }
 }
 
