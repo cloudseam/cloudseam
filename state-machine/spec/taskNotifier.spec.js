@@ -27,7 +27,7 @@ describe('taskNotifier', () => {
         stateMachine = {
             getTask: jasmine
                 .createSpy('stateMachine.getTask')
-                .and.callFake(task => tasks.find(t => t.name === task.name)),
+                .and.callFake(taskName => tasks.find(t => t.name === taskName)),
         };
     });
 

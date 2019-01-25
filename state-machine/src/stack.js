@@ -82,13 +82,15 @@ class Stack {
     }
 
     hasTasks() {
-        return this.getTasks().length > 0;
+        return this.getPendingTasks().length > 0;
     }
 
     getTasks() {
-        return this.tasks
-            .filter(r => r.status !== TaskStatus.SATISFIED)
-            .map(r => r.name);
+        return this.tasks;
+    }
+
+    getPendingTasks() {
+        return this.getTasks().filter(t => t.status !== TaskStatus.SATISFIED);
     }
 
     resetFailedTasks() {

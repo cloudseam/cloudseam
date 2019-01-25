@@ -10,7 +10,7 @@ async function taskNotifier(
     for (let i = 0; i < tasks.length; i++) {
         await sendMessage(
             {
-                task: stateMachine.getTask(tasks[i]),
+                task: stateMachine.getTask(tasks[i].name),
                 stack,
             },
             sqsClient,

@@ -126,20 +126,20 @@ describe('Stack', () => {
         });
 
         it('getTasks works as expected', () => {
-            expect(stack.getTasks().length).toBe(0);
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(0);
 
             stack.addTask('req1');
-            expect(stack.getTasks().length).toBe(1);
-            expect(stack.getTasks()).toContain('req1');
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(1);
+            expect(stack.getPendingTasks().map(t => t.name)).toContain('req1');
 
             stack.addTask('req2');
-            expect(stack.getTasks().length).toBe(2);
-            expect(stack.getTasks()).toContain('req1');
-            expect(stack.getTasks()).toContain('req2');
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(2);
+            expect(stack.getPendingTasks().map(t => t.name)).toContain('req1');
+            expect(stack.getPendingTasks().map(t => t.name)).toContain('req2');
 
             stack.satisfyTask('req1');
-            expect(stack.getTasks().length).toBe(1);
-            expect(stack.getTasks()).toContain('req2');
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(1);
+            expect(stack.getPendingTasks().map(t => t.name)).toContain('req2');
         });
 
         it("throws when adding a task that's already been defined", () => {
@@ -159,7 +159,7 @@ describe('Stack', () => {
             stack.indicateTaskFailure('req1', 'An error occurred');
 
             expect(stack.tasks[0].errorMessage).toBe('An error occurred');
-            expect(stack.getTasks().length).toBe(1);
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(1);
             expect(stack.hasError()).toBe(true);
         });
 
@@ -170,7 +170,7 @@ describe('Stack', () => {
             stack.satisfyTask('req1');
 
             expect(stack.tasks[0].errorMessage).toBe(undefined);
-            expect(stack.getTasks().length).toBe(0);
+            expect(stack.getPendingTasks().map(t => t.name).length).toBe(0);
             expect(stack.hasError()).toBe(false);
         });
 

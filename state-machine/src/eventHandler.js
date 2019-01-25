@@ -45,6 +45,9 @@ async function eventHandler(
             await taskNotifier(stack, machine, t => t.status === 'ERROR');
             stack.resetFailedTasks();
             break;
+        case 'RETRY_PENDING_TASKS':
+            await taskNotifier(stack, machine, t => t.status === 'PENDING');
+            break;
         default:
             machine.processAction(stack, event.action);
             break;
