@@ -41,10 +41,10 @@ describe('eventHandler', () => {
     });
 
     it('sends error when satisfying fails via Promise rejection', async () => {
-        const errorMessage = 'An (expected) ERROR has occurred';
+        const error = new Error('An (expected) ERROR has occurred');
         satisfier = jasmine
             .createSpy('satisfier')
-            .and.returnValue(Promise.reject(new Error(errorMessage)));
+            .and.returnValue(Promise.reject(error));
 
         await eventHandler(event, satisfier, responseSender);
 
@@ -53,7 +53,7 @@ describe('eventHandler', () => {
         expect(responseSender.sendError).toHaveBeenCalledWith(
             event.stack.id,
             event.task,
-            errorMessage,
+            error.stack,
         );
     });
 });
