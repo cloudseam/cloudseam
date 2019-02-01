@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 
 AWS.config.region = process.env.AWS_DEFAULT_REGION;
+AWS.config.correctClockSkew = true;
 
 const secretsManager = new AWS.SecretsManager();
 
