@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+  - "node"
+
+matrix:
+  include:
+    - env: MACHINE_LOCATOR=LOCAL_FS MACHINE_SPEC_DIR=$TRAVIS_BUILD_DIR/state-machine/machines LOCAL_MODE=true PROJECT=state-machine
+    - env: PROJECT=task-satisfier
+
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+script: 
+  - cd $PROJECT
+  - yarn install
+  - yarn test

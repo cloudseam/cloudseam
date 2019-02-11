@@ -1,6 +1,6 @@
 const defaultMachines = require('./machines');
 const defaultRepo = require('./repo');
-const taskNotifier = require('./taskNotifier');
+const defaultTaskNotifier = require('./taskNotifier');
 const defaultStackLocator = require('./stackLocator');
 const defaultMachineRetriever = require('./machines');
 const Stack = require('./stack');
@@ -18,8 +18,14 @@ async function eventHandler(
     machineRetriever = defaultMachineRetriever,
     repo = defaultRepo,
     stackLocator = defaultStackLocator,
+    taskNotifier = defaultTaskNotifier,
 ) {
     console.log(`Received event`, event);
+
+    if (event.stackId === undefined)
+        throw new Error(`Event missing required "stackId" property"`);
+    if (event.action === undefined)
+        throw new Error(`Event missing required "action" property"`);
 
     const stack = await stackLocator(event.stackId, event.machine);
     stack.addMetadata(event.metadata);
