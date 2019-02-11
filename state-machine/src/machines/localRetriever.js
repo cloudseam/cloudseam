@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const YAML = require('yamljs');
 const StateMachine = require('./stateMachine');
-const validateMachine = require('./validator');
+const validateMachine = require('@cloudseam/machine-validator');
 
 const dirName = process.env.MACHINE_SPEC_DIR;
 
