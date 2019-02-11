@@ -12,7 +12,7 @@ function sendError(stackId, task, message, sqsClient = defaultSqsClient) {
 
 function sendMessage(action, stackId, task, sqsClient, extraData = {}) {
     const messageBody = JSON.stringify({
-        action,
+        event: action,
         stackId,
         task,
         ...extraData,

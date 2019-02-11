@@ -17,7 +17,7 @@ describe('responseSender', () => {
         await responseSender.sendSuccess(stackId, task, sqsClient);
 
         const body = {
-            action: 'TASK_COMPLETED',
+            event: 'TASK_COMPLETED',
             stackId,
             task,
         };
@@ -33,7 +33,7 @@ describe('responseSender', () => {
         await responseSender.sendError(stackId, task, errorMessage, sqsClient);
 
         const body = {
-            action: 'TASK_ERROR',
+            event: 'TASK_ERROR',
             stackId,
             task,
             description: errorMessage,
