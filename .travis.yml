@@ -3,9 +3,7 @@ node_js:
   - "node"
 
 env:
-  - MACHINE_LOCATOR=LOCAL_FS
-  - MACHINE_SPEC_DIR=$TRAVIS_BUILD_DIR/state-machine/machines
-  - LOCAL_MODE=true
+  - MACHINE_LOCATOR=LOCAL_FS MACHINE_SPEC_DIR=$TRAVIS_BUILD_DIR/state-machine/machines LOCAL_MODE=true
 
 matrix:
   include:
