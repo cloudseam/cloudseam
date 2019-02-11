@@ -10,7 +10,7 @@ describe('eventHandler', () => {
         taskNotifyingFn,
         stackLocator,
         stack,
-        event,
+        request,
         satisfied,
         inTerminalState,
         processActionFn;
@@ -68,16 +68,16 @@ describe('eventHandler', () => {
                 .and.returnValue(Promise.resolve()),
         };
 
-        event = { stackId: stack.id, action: 'LAUNCH', machine: 'qa' };
+        request = { stackId: stack.id, action: 'LAUNCH', machine: 'qa' };
     });
 
     it('fails when stackId not specified in event', async () => {
-        event.stackId = undefined;
+        request.stackId = undefined;
         await validateFailure('Event missing required "stackId" property');
     });
 
     it('fails when stackId not specified in event', async () => {
-        event.action = undefined;
+        request.action = undefined;
         await validateFailure('Event missing required "action" property');
     });
 
@@ -86,138 +86,273 @@ describe('eventHandler', () => {
         await validateFailure('Unrecognized machine: qa');
     });
 
-    it('handles TASK_COMPLETED events', async () => {
-        event.task = { name: taskName };
-        event.action = 'TASK_COMPLETED';
+    describe('using action (deprecated)', () => {
+        it('handles TASK_COMPLETED events', async () => {
+            request.task = { name: taskName };
+            request.action = 'TASK_COMPLETED';
 
-        await run(event);
+            await run(request);
 
-        expect(machine.satisfyTask).toHaveBeenCalledWith(stack, taskName);
-        expect(repo.saveStack).toHaveBeenCalledWith(stack);
-    });
-
-    it('handles TASK_ERROR events', async () => {
-        event.task = { name: taskName };
-        event.action = 'TASK_ERROR';
-        event.description = 'An error occurred';
-
-        await run(event);
-
-        expect(machine.indicateTaskFailure).toHaveBeenCalledWith(
-            stack,
-            taskName,
-            event.description,
-        );
-        expect(repo.saveStack).toHaveBeenCalledWith(stack);
-    });
-
-    it('handles RETRY_FAILED_TASKS events', async () => {
-        event.task = { name: taskName };
-        event.action = 'RETRY_FAILED_TASKS';
-
-        await run(event);
-
-        expect(taskNotifier).toHaveBeenCalled();
-        expect(taskNotifyingFn({ status: 'ERROR' })).toBe(true);
-        expect(taskNotifyingFn({ status: 'PENDING' })).toBe(false);
-        expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
-        expect(stack.resetFailedTasks).toHaveBeenCalled();
-
-        expect(repo.saveStack).toHaveBeenCalledWith(stack);
-    });
-
-    it('handles RETRY_PENDING_TASKS events', async () => {
-        event.task = { name: taskName };
-        event.action = 'RETRY_PENDING_TASKS';
-
-        await run(event);
-
-        expect(taskNotifier).toHaveBeenCalled();
-        expect(taskNotifyingFn({ status: 'ERROR' })).toBe(false);
-        expect(taskNotifyingFn({ status: 'PENDING' })).toBe(true);
-        expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
-
-        expect(repo.saveStack).toHaveBeenCalledWith(stack);
-    });
-
-    describe('custom event handling', () => {
-        beforeEach(() => {
-            event.action = 'LAUNCH';
+            expect(machine.satisfyTask).toHaveBeenCalledWith(stack, taskName);
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
         });
 
-        it('does the basics with no state change', async () => {
-            await run(event);
+        it('handles TASK_ERROR events', async () => {
+            request.task = { name: taskName };
+            request.action = 'TASK_ERROR';
+            request.description = 'An error occurred';
 
-            expect(machine.processAction).toHaveBeenCalledWith(
+            await run(request);
+
+            expect(machine.indicateTaskFailure).toHaveBeenCalledWith(
                 stack,
-                event.action,
+                taskName,
+                request.description,
             );
             expect(repo.saveStack).toHaveBeenCalledWith(stack);
-            expect(taskNotifier).not.toHaveBeenCalled();
         });
 
-        it('does the basics with a satisfied state change', async () => {
-            processActionFn = stack => {
-                stack.state = 'UPDATED';
-                return Promise.resolve();
-            };
+        it('handles RETRY_FAILED_TASKS events', async () => {
+            request.task = { name: taskName };
+            request.action = 'RETRY_FAILED_TASKS';
 
-            await run(event);
+            await run(request);
 
-            expect(machine.processAction).toHaveBeenCalledWith(
-                stack,
-                event.action,
-            );
+            expect(taskNotifier).toHaveBeenCalled();
+            expect(taskNotifyingFn({ status: 'ERROR' })).toBe(true);
+            expect(taskNotifyingFn({ status: 'PENDING' })).toBe(false);
+            expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+            expect(stack.resetFailedTasks).toHaveBeenCalled();
 
-            expect(stack.state).toBe('UPDATED');
             expect(repo.saveStack).toHaveBeenCalledWith(stack);
-            expect(taskNotifier).not.toHaveBeenCalled();
         });
 
-        it('sends tasks on state change and not satisfied', async () => {
-            processActionFn = stack => {
-                stack.state = 'UPDATED';
-                return Promise.resolve();
-            };
-            satisfied = false;
+        it('handles RETRY_PENDING_TASKS events', async () => {
+            request.task = { name: taskName };
+            request.action = 'RETRY_PENDING_TASKS';
 
-            await run(event);
+            await run(request);
 
-            expect(machine.processAction).toHaveBeenCalledWith(
-                stack,
-                event.action,
-            );
-
-            expect(stack.state).toBe('UPDATED');
-            expect(repo.saveStack).toHaveBeenCalledWith(stack);
             expect(taskNotifier).toHaveBeenCalled();
             expect(taskNotifyingFn({ status: 'ERROR' })).toBe(false);
             expect(taskNotifyingFn({ status: 'PENDING' })).toBe(true);
             expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
         });
 
-        it('removes the stack when satisfied and terminal', async () => {
-            processActionFn = stack => {
-                stack.state = 'DONE';
-                return Promise.resolve();
-            };
-            inTerminalState = true;
+        describe('custom event handling', () => {
+            beforeEach(() => {
+                request.action = 'LAUNCH';
+            });
 
-            await run(event);
+            it('does the basics with no state change', async () => {
+                await run(request);
 
-            expect(machine.processAction).toHaveBeenCalledWith(
-                stack,
-                event.action,
-            );
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
 
-            expect(stack.state).toBe('DONE');
-            expect(repo.saveStack).toHaveBeenCalledWith(stack);
-            expect(repo.removeStack).toHaveBeenCalledWith(stack);
-            expect(taskNotifier).not.toHaveBeenCalled();
+            it('does the basics with a satisfied state change', async () => {
+                processActionFn = stack => {
+                    stack.state = 'UPDATED';
+                    return Promise.resolve();
+                };
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('UPDATED');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
+
+            it('sends tasks on state change and not satisfied', async () => {
+                processActionFn = stack => {
+                    stack.state = 'UPDATED';
+                    return Promise.resolve();
+                };
+                satisfied = false;
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('UPDATED');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).toHaveBeenCalled();
+                expect(taskNotifyingFn({ status: 'ERROR' })).toBe(false);
+                expect(taskNotifyingFn({ status: 'PENDING' })).toBe(true);
+                expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+            });
+
+            it('removes the stack when satisfied and terminal', async () => {
+                processActionFn = stack => {
+                    stack.state = 'DONE';
+                    return Promise.resolve();
+                };
+                inTerminalState = true;
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('DONE');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(repo.removeStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
         });
     });
 
-    async function validateFailure(description, runEvent = event) {
+    describe('using event in payload', () => {
+        it('handles TASK_COMPLETED events', async () => {
+            request.task = { name: taskName };
+            request.event = 'TASK_COMPLETED';
+
+            await run(request);
+
+            expect(machine.satisfyTask).toHaveBeenCalledWith(stack, taskName);
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
+        });
+
+        it('handles TASK_ERROR events', async () => {
+            request.task = { name: taskName };
+            request.event = 'TASK_ERROR';
+            request.description = 'An error occurred';
+
+            await run(request);
+
+            expect(machine.indicateTaskFailure).toHaveBeenCalledWith(
+                stack,
+                taskName,
+                request.description,
+            );
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
+        });
+
+        it('handles RETRY_FAILED_TASKS events', async () => {
+            request.task = { name: taskName };
+            request.event = 'RETRY_FAILED_TASKS';
+
+            await run(request);
+
+            expect(taskNotifier).toHaveBeenCalled();
+            expect(taskNotifyingFn({ status: 'ERROR' })).toBe(true);
+            expect(taskNotifyingFn({ status: 'PENDING' })).toBe(false);
+            expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+            expect(stack.resetFailedTasks).toHaveBeenCalled();
+
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
+        });
+
+        it('handles RETRY_PENDING_TASKS events', async () => {
+            request.task = { name: taskName };
+            request.event = 'RETRY_PENDING_TASKS';
+
+            await run(request);
+
+            expect(taskNotifier).toHaveBeenCalled();
+            expect(taskNotifyingFn({ status: 'ERROR' })).toBe(false);
+            expect(taskNotifyingFn({ status: 'PENDING' })).toBe(true);
+            expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+
+            expect(repo.saveStack).toHaveBeenCalledWith(stack);
+        });
+
+        describe('custom event handling', () => {
+            beforeEach(() => {
+                request.event = 'LAUNCH';
+            });
+
+            it('does the basics with no state change', async () => {
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
+
+            it('does the basics with a satisfied state change', async () => {
+                processActionFn = stack => {
+                    stack.state = 'UPDATED';
+                    return Promise.resolve();
+                };
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('UPDATED');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
+
+            it('sends tasks on state change and not satisfied', async () => {
+                processActionFn = stack => {
+                    stack.state = 'UPDATED';
+                    return Promise.resolve();
+                };
+                satisfied = false;
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('UPDATED');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).toHaveBeenCalled();
+                expect(taskNotifyingFn({ status: 'ERROR' })).toBe(false);
+                expect(taskNotifyingFn({ status: 'PENDING' })).toBe(true);
+                expect(taskNotifyingFn({ status: 'COMPLETE' })).toBe(false);
+            });
+
+            it('removes the stack when satisfied and terminal', async () => {
+                processActionFn = stack => {
+                    stack.state = 'DONE';
+                    return Promise.resolve();
+                };
+                inTerminalState = true;
+
+                await run(request);
+
+                expect(machine.processAction).toHaveBeenCalledWith(
+                    stack,
+                    request.action,
+                );
+
+                expect(stack.state).toBe('DONE');
+                expect(repo.saveStack).toHaveBeenCalledWith(stack);
+                expect(repo.removeStack).toHaveBeenCalledWith(stack);
+                expect(taskNotifier).not.toHaveBeenCalled();
+            });
+        });
+    });
+
+    async function validateFailure(description, runEvent = request) {
         try {
             await run(runEvent);
             fail('Should have failed');

@@ -14,21 +14,24 @@ const Stack = require('./stack');
  * }
  */
 async function eventHandler(
-    event,
+    eventRequest,
     machineRetriever = defaultMachineRetriever,
     repo = defaultRepo,
     stackLocator = defaultStackLocator,
     taskNotifier = defaultTaskNotifier,
 ) {
-    console.log(`Received event`, event);
+    console.log(`Received event`, eventRequest);
 
-    if (event.stackId === undefined)
+    if (eventRequest.stackId === undefined)
         throw new Error(`Event missing required "stackId" property"`);
-    if (event.action === undefined)
+    if (eventRequest.action === undefined)
         throw new Error(`Event missing required "action" property"`);
 
-    const stack = await stackLocator(event.stackId, event.machine);
-    stack.addMetadata(event.metadata);
+    const stack = await stackLocator(
+        eventRequest.stackId,
+        eventRequest.machine,
+    );
+    stack.addMetadata(eventRequest.metadata);
 
     const machine = await machineRetriever(stack.machine);
     if (machine === undefined)
@@ -36,15 +39,17 @@ async function eventHandler(
 
     const initialState = stack.state;
 
-    switch (event.action) {
+    const event = eventRequest.event || eventRequest.action;
+
+    switch (event) {
         case 'TASK_COMPLETED':
-            machine.satisfyTask(stack, event.task.name);
+            machine.satisfyTask(stack, eventRequest.task.name);
             break;
         case 'TASK_ERROR':
             machine.indicateTaskFailure(
                 stack,
-                event.task.name,
-                event.description,
+                eventRequest.task.name,
+                eventRequest.description,
             );
             break;
         case 'RETRY_FAILED_TASKS':
@@ -55,7 +60,7 @@ async function eventHandler(
             await taskNotifier(stack, machine, t => t.status === 'PENDING');
             break;
         default:
-            machine.processAction(stack, event.action);
+            machine.processAction(stack, event);
             break;
     }
 
