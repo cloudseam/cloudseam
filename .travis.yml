@@ -2,10 +2,15 @@ language: node_js
 node_js:
   - "node"
 
+env:
+  - MACHINE_LOCATOR=LOCAL_FS
+  - MACHINE_SPEC_DIR=$TRAVIS_BUILD_DIR/state-machine/machines
+  - LOCAL_MODE=true
+
 matrix:
-    include:
-        - env: PROJECT=state-machine
-        - env: PROJECT=task-satisfier
+  include:
+    - env: PROJECT=state-machine
+    - env: PROJECT=task-satisfier
 
 cache:
   yarn: true
