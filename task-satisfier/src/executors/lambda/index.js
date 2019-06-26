@@ -11,7 +11,19 @@ async function lambdaExecutor(stack, task, lambdaClient = defaultLambdaClient) {
         Payload: JSON.stringify(payload),
     };
 
-    return lambdaClient.invoke(params).promise();
+    return lambdaClient
+        .invoke(params)
+        .promise()
+        .then(data => {
+            if (data.FunctionError) {
+                const payload = JSON.parse(data.Payload);
+                const message = `${payload.errorType}: ${
+                    payload.errorMessage
+                }\n${payload.trace.join('\n')}`;
+                throw new Error(message);
+            }
+            return data.Payload;
+        });
 }
 
 module.exports = lambdaExecutor;
