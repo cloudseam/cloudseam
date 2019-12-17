@@ -70,6 +70,7 @@ class StateMachine {
         stack.resetTasks();
         stack.state = newStateName;
 
+        console.log(`Transitioning stack to state: ${newStateName}`);
         const newState = this._getState(newStateName);
         if (newState.tasks) newState.tasks.forEach(task => stack.addTask(task));
     }
