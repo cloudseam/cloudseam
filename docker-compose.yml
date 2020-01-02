@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   proxy:
-    image: traefik
+    image: traefik:1.7
     command: --api --docker
     ports:
       - 80:80
@@ -11,7 +11,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   machine:
-    image: node:10
+    image: node:12
     command: sh -c "yarn install && yarn run dev"
     working_dir: /app
     volumes:
@@ -32,7 +32,7 @@ services:
       SQS_TASK_QUEUE_URL: http://sqs:9324/queue/stack-tasks
   
   satisfier:
-    image: node:8.10
+    image: node:12
     command: sh -c "yarn install && yarn run dev"
     working_dir: /app
     volumes:
@@ -64,7 +64,7 @@ services:
       - ./local-sqs/elasticmq.conf:/opt/elasticmq.conf
 
   sqs-gui:
-    image: node:8.10
+    image: node:12
     command: /app/run.sh
     working_dir: /app
     volumes:
