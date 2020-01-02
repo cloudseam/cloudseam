@@ -86,6 +86,13 @@ describe('eventHandler', () => {
         await validateFailure('Unrecognized machine: qa');
     });
 
+    it('fails when action is NEXT', async () => {
+        request.action = 'NEXT';
+        await validateFailure(
+            'External triggering of the NEXT event is not allowed',
+        );
+    });
+
     describe('using action (deprecated)', () => {
         it('handles TASK_COMPLETED events', async () => {
             request.task = { name: taskName };
