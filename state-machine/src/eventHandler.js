@@ -26,6 +26,8 @@ async function eventHandler(
         throw new Error(`Event missing required "stackId" property"`);
     if (eventRequest.action === undefined && eventRequest.event === undefined)
         throw new Error(`Event missing required "event" property"`);
+    if (eventRequest.action === 'NEXT')
+        throw new Error(`External triggering of the NEXT event is not allowed`);
 
     const stack = await stackLocator(
         eventRequest.stackId,
