@@ -15,7 +15,7 @@
     "concurrently": "^4.0.1",
     "jasmine": "3.2.0",
     "jasmine-expect": "^4.0.0",
-    "nodemon": "1.18.7",
+    "nodemon": "2.0.2",
     "prettier": "1.15.2"
   },
   "prettier": {
