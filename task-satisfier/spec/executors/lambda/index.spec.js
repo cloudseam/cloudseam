@@ -5,7 +5,7 @@ describe('lambda executor', () => {
 
     beforeEach(() => {
         invocationResult = {
-            Payload : JSON.stringify({ success : true }),
+            Payload: JSON.stringify({ success: true }),
         };
 
         lambdaClient = {
@@ -39,20 +39,17 @@ describe('lambda executor', () => {
     // Documented https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-mode-exceptions.html
     it('handles lambda invocation errors correctly', async () => {
         invocationResult = {
-            FunctionError : 'unhandled',
-            Payload : JSON.stringify({
+            FunctionError: 'unhandled',
+            Payload: JSON.stringify({
                 errorType: 'ReferenceError',
                 errorMessage: 'x is not defined',
-                trace : [
-                    'Trace Line 1',
-                    'Trace Line 2',
-                ]
-            })
-        }
+                trace: ['Trace Line 1', 'Trace Line 2'],
+            }),
+        };
 
         try {
             result = await lambdaExecutor(stack, task, lambdaClient);
-            fail("Should have thrown");
+            fail('Should have thrown');
         } catch (e) {
             expect(e.message).toContain('ReferenceError');
             expect(e.message).toContain('x is not defined');
