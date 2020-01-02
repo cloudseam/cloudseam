@@ -78,12 +78,12 @@ services:
       AWS_ACCESS_KEY_ID: dummy-key
       AWS_SECRET_ACCESS_KEY: dummy-secret-key
 
-#  db:
-#    image: postgres:9.5
-#    environment:
-#      POSTGRES_PASSWORD: summit
-#      POSTGRES_USER: summit
-#      POSTGRES_DB: summit
+  db:
+    image: postgres:9.5
+    environment:
+      POSTGRES_PASSWORD: cloudseam
+      POSTGRES_USER: cloudseam
+      POSTGRES_DB: cloudseam
 
   sqs:
     image: softwaremill/elasticmq
