@@ -76,9 +76,9 @@ describe('eventHandler', () => {
         await validateFailure('Event missing required "stackId" property');
     });
 
-    it('fails when stackId not specified in event', async () => {
+    it('fails when action/event not specified in event', async () => {
         request.action = undefined;
-        await validateFailure('Event missing required "action" property');
+        await validateFailure('Event missing required "event" property');
     });
 
     it('fails when requested machine is not recognized', async () => {

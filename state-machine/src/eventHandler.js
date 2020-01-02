@@ -24,8 +24,8 @@ async function eventHandler(
 
     if (eventRequest.stackId === undefined)
         throw new Error(`Event missing required "stackId" property"`);
-    if (eventRequest.action === undefined)
-        throw new Error(`Event missing required "action" property"`);
+    if (eventRequest.action === undefined && eventRequest.event === undefined)
+        throw new Error(`Event missing required "event" property"`);
 
     const stack = await stackLocator(
         eventRequest.stackId,
