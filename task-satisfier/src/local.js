@@ -16,10 +16,10 @@ async function run() {
         };
         await lambdaHandler(lambdaMock);
         await deleteMessage(message.Messages[0].ReceiptHandle);
-
-        setTimeout(() => run(), 1000);
     } catch (err) {
         console.error(err);
+    } finally {
+        setTimeout(() => run(), 1000);
     }
 }
 

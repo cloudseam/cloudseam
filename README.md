@@ -34,7 +34,7 @@ Each of the app containers are configured to run tests and Prettier upon every f
 To send messages into the event queue, you simply need to inform the AWS CLI to send messages locally instead of AWS.
 
 ```bash
-aws --endpoint-url=http://localhost:9324 sqs send-message --queue-url http://localhost:9324/queue/stack-events --message-body '{"stackId":"master","action":"LAUNCH"}'
+aws --endpoint-url=http://localhost:9324 sqs send-message --queue-url http://localhost:9324/queue/stack-events --message-body '{"stackId":"master","machine":"v1-sample","event":"LAUNCH"}'
 ```
 
 The queue URLS are: (for the most part, you should _only_ send messages to the Event Queue)

@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   proxy:
-    image: traefik
+    image: traefik:1.7
     command: --api --docker
     ports:
       - 80:80
@@ -11,7 +11,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   machine:
-    image: node:10
+    image: node:12
     command: sh -c "yarn install && yarn run dev"
     working_dir: /app
     volumes:
@@ -20,7 +20,7 @@ services:
       - ./state-machine/src:/app/src:cached
       - ./state-machine/spec:/app/spec:cached
       - ./state-machine/node_modules:/app/node_modules:cached
-      - ./state-machine/machines:/machines
+      - ./samples/machines:/machines
     environment:
       MACHINE_LOCATOR: LOCAL_FS
       MACHINE_SPEC_DIR: /machines
@@ -30,9 +30,10 @@ services:
       AWS_SECRET_ACCESS_KEY: dummy-secret-key
       SQS_EVENT_QUEUE_URL: http://sqs:9324/queue/stack-events
       SQS_TASK_QUEUE_URL: http://sqs:9324/queue/stack-tasks
+      DYNAMODB_TABLE: Stacks
   
   satisfier:
-    image: node:8.10
+    image: node:12
     command: sh -c "yarn install && yarn run dev"
     working_dir: /app
     volumes:
@@ -40,6 +41,7 @@ services:
       - ./task-satisfier/yarn.lock:/app/yarn.lock
       - ./task-satisfier/src:/app/src:cached
       - ./task-satisfier/spec:/app/spec:cached
+      - ./samples:/samples:cached
     environment:
       LOCAL_MODE: "true"
       AWS_DEFAULT_REGION: us-east-1
@@ -48,12 +50,40 @@ services:
       SQS_EVENT_QUEUE_URL: http://sqs:9324/queue/stack-events
       SQS_TASK_QUEUE_URL: http://sqs:9324/queue/stack-tasks
 
-  db:
-    image: postgres:9.5
+  dynamodb:
+    image: amazon/dynamodb-local
+
+  dynamodb-viewer:
+    image: aaronshaf/dynamodb-admin
+    depends_on:
+      - dynamodb
+    labels:
+      traefik.backend: dynamodb-viewer
+      traefik.frontend.priority: 10
+      traefik.frontend.rule: Host:dynamodb.localhost
+      traefik.port: 8001
     environment:
-      POSTGRES_PASSWORD: summit
-      POSTGRES_USER: summit
-      POSTGRES_DB: summit
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: dummy-key
+      AWS_SECRET_ACCESS_KEY: dummy-secret-key
+      DYNAMO_ENDPOINT: http://dynamodb:8000
+
+  dynamodb-table-creator:
+    image: mikesir87/aws-cli
+    command: sh -c "sleep 2 & aws --endpoint=http://dynamodb:8000 dynamodb create-table --table-name Stacks --key-schema AttributeName=id,KeyType=HASH --attribute-definitions AttributeName=id,AttributeType=S --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5"
+    depends_on:
+      - dynamodb
+    environment:
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: dummy-key
+      AWS_SECRET_ACCESS_KEY: dummy-secret-key
+
+#  db:
+#    image: postgres:9.5
+#    environment:
+#      POSTGRES_PASSWORD: summit
+#      POSTGRES_USER: summit
+#      POSTGRES_DB: summit
 
   sqs:
     image: softwaremill/elasticmq
@@ -63,7 +93,7 @@ services:
       - ./local-sqs/elasticmq.conf:/opt/elasticmq.conf
 
   sqs-gui:
-    image: node:8.10
+    image: node:12
     command: /app/run.sh
     working_dir: /app
     volumes:

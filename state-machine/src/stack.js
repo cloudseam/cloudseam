@@ -5,8 +5,12 @@ const TaskStatus = {
 };
 
 class Stack {
+    static from(data) {
+        return Object.setPrototypeOf(data, Stack.prototype);
+    }
+
     static fromJson(jsonData) {
-        return Object.setPrototypeOf(JSON.parse(jsonData), Stack.prototype);
+        return Stack.from(JSON.parse(jsonData));
     }
 
     constructor(id, machine, state = 'INIT') {
