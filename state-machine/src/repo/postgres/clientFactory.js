@@ -37,10 +37,10 @@ async function getConfig() {
     if (process.env.LOCAL_MODE) {
         console.log(`Using local db credentials`);
         return {
-            username: 'summit',
             host: 'db',
-            database: 'summit',
-            password: 'summit',
+            username: 'cloudseam',
+            password: 'cloudseam',
+            database: 'cloudseam',
         };
     }
 
