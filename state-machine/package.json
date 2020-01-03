@@ -6,7 +6,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "dev": "nodemon --signal SIGINT -e js,yml --watch $MACHINE_SPEC_DIR --watch src --watch spec --exec \"concurrently npm:prettify npm:serve npm:test\"",
+    "dev": "concurrently npm:dev-watch npm:test-watch",
+    "dev-watch": "nodemon --signal SIGINT --watch src --watch spec --exec \"concurrently npm:serve npm:prettify\"",
     "prettify": "prettier -l --write \"**/*.js\"",
     "serve": "node src/local.js",
     "test": "jest",

@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --signal SIGINT --watch src --watch spec --exec \"concurrently npm:serve npm:test npm:prettify\"",
+    "dev": "concurrently npm:dev-watch npm:test-watch",
+    "dev-watch": "nodemon --signal SIGINT --watch src --watch spec --exec \"concurrently npm:serve npm:prettify\"",
     "prettify": "prettier -l --write \"**/*.js\"",
     "serve": "node src/local.js",
     "test": "jest",
