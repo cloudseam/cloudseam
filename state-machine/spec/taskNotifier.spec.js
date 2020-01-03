@@ -1,60 +1,54 @@
 const taskNotifier = require('../src/taskNotifier');
+const sqsClient = require('../src/aws').sqs;
 
-describe('taskNotifier', () => {
-    let stack, stackMachine, tasks, sqsClient;
+jest.mock('../src/aws', () => ({
+    sqs: {
+        sendMessage: jest.fn().mockReturnValue({
+            promise: () => Promise.resolve(),
+        }),
+    },
+}));
 
-    beforeEach(() => {
-        tasks = [
-            { name: 'task1', status: 'PENDING' },
-            { name: 'task2', status: 'PENDING' },
-            { name: 'task3', status: 'ERROR' },
-        ];
+let stack, stackMachine, mockTasks;
 
-        stack = {
-            getTasks: jasmine
-                .createSpy('stack.getTasks')
-                .and.returnValue(tasks),
-        };
+beforeEach(() => {
+    mockTasks = [
+        { name: 'task1', status: 'PENDING' },
+        { name: 'task2', status: 'PENDING' },
+        { name: 'task3', status: 'ERROR' },
+    ];
 
-        sqsClient = {
-            sendMessage: jasmine
-                .createSpy('sqsClient.sendMessage')
-                .and.returnValue({
-                    promise: () => Promise.resolve(),
-                }),
-        };
+    stack = {
+        getTasks: jest.fn().mockImplementation(() => mockTasks),
+    };
 
-        stateMachine = {
-            getTask: jasmine
-                .createSpy('stateMachine.getTask')
-                .and.callFake(taskName => tasks.find(t => t.name === taskName)),
-        };
+    stateMachine = {
+        getTask: jest
+            .fn()
+            .mockImplementation(taskName =>
+                mockTasks.find(t => t.name === taskName),
+            ),
+    };
+});
+
+it('sends messages to all accepted tasks', async () => {
+    await taskNotifier(stack, stateMachine, t => t.status === 'PENDING');
+
+    expect(sqsClient.sendMessage).toHaveBeenCalledTimes(2);
+
+    expect(sqsClient.sendMessage).toHaveBeenCalledWith({
+        QueueUrl: process.env.SQS_TASK_QUEUE_URL,
+        MessageBody: JSON.stringify({
+            task: mockTasks[0],
+            stack,
+        }),
     });
 
-    it('sends messages to all accepted tasks', async () => {
-        await taskNotifier(
+    expect(sqsClient.sendMessage).toHaveBeenCalledWith({
+        QueueUrl: process.env.SQS_TASK_QUEUE_URL,
+        MessageBody: JSON.stringify({
+            task: mockTasks[1],
             stack,
-            stateMachine,
-            t => t.status === 'PENDING',
-            sqsClient,
-        );
-
-        expect(sqsClient.sendMessage).toHaveBeenCalledTimes(2);
-
-        expect(sqsClient.sendMessage).toHaveBeenCalledWith({
-            QueueUrl: process.env.SQS_TASK_QUEUE_URL,
-            MessageBody: JSON.stringify({
-                task: tasks[0],
-                stack,
-            }),
-        });
-
-        expect(sqsClient.sendMessage).toHaveBeenCalledWith({
-            QueueUrl: process.env.SQS_TASK_QUEUE_URL,
-            MessageBody: JSON.stringify({
-                task: tasks[1],
-                stack,
-            }),
-        });
+        }),
     });
 });

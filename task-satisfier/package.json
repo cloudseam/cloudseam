@@ -4,10 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --signal SIGINT --watch src --watch spec --exec \"concurrently npm:serve npm:test npm:prettify\"",
+    "dev": "concurrently npm:dev-watch npm:test-watch",
+    "dev-watch": "nodemon --signal SIGINT --watch src --watch spec --exec \"concurrently npm:serve npm:prettify\"",
     "prettify": "prettier -l --write \"**/*.js\"",
     "serve": "node src/local.js",
-    "test": "jasmine"
+    "test": "jest",
+    "test-watch": "jest --watchAll"
   },
   "dependencies": {
     "aws-sdk": "^2.356.0",
@@ -16,7 +18,7 @@
   },
   "devDependencies": {
     "concurrently": "4.0.1",
-    "jasmine": "3.3.0",
+    "jest": "24.9.0",
     "nodemon": "2.0.2",
     "prettier": "1.15.2"
   },

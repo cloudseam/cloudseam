@@ -1,16 +1,16 @@
-const defaultSqsClient = require('./aws').sqsClient;
+const sqsClient = require('./aws').sqsClient;
 
-function sendSuccess(stackId, task, sqsClient = defaultSqsClient) {
-    return sendMessage('TASK_COMPLETED', stackId, task, sqsClient);
+function sendSuccess(stackId, task) {
+    return sendMessage('TASK_COMPLETED', stackId, task);
 }
 
-function sendError(stackId, task, message, sqsClient = defaultSqsClient) {
-    return sendMessage('TASK_ERROR', stackId, task, sqsClient, {
+function sendError(stackId, task, message) {
+    return sendMessage('TASK_ERROR', stackId, task, {
         description: message,
     });
 }
 
-function sendMessage(action, stackId, task, sqsClient, extraData = {}) {
+function sendMessage(action, stackId, task, extraData = {}) {
     const messageBody = JSON.stringify({
         event: action,
         stackId,

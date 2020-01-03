@@ -1,25 +1,18 @@
-const defaultMachines = require('./machines');
-const defaultRepo = require('./repo');
-const defaultTaskNotifier = require('./taskNotifier');
-const defaultStackLocator = require('./stackLocator');
-const defaultMachineRetriever = require('./machines');
+const repo = require('./repo');
+const taskNotifier = require('./taskNotifier');
+const stackLocator = require('./stackLocator');
+const machineRetriever = require('./machines');
 const Stack = require('./stack');
 
 /**
  * {
- *   action: "LAUNCH",
+ *   event: "LAUNCH",
  *   stackId: "crest-1234",
  *   machine: "qa",
  *   task : { name : "ecs-setup", config : {}} // Only when action is TASK_COMPLETED
  * }
  */
-async function eventHandler(
-    eventRequest,
-    machineRetriever = defaultMachineRetriever,
-    repo = defaultRepo,
-    stackLocator = defaultStackLocator,
-    taskNotifier = defaultTaskNotifier,
-) {
+async function eventHandler(eventRequest) {
     console.log(`Received event`, eventRequest);
 
     if (eventRequest.stackId === undefined)
@@ -71,8 +64,10 @@ async function eventHandler(
     if (stack.state !== initialState && !stack.isSatisfied())
         await taskNotifier(stack, machine, t => t.status === 'PENDING');
 
-    if (stack.isSatisfied() && machine.isTerminalState(stack.state))
+    if (stack.isSatisfied() && machine.isTerminalState(stack.state)) {
         await repo.removeStack(stack);
+        console.log(`Stack ${stack.id} has been removed`);
+    }
 }
 
 module.exports = eventHandler;

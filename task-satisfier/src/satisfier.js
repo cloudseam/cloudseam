@@ -1,7 +1,7 @@
-const defaultExecutors = require('./executors');
+const executors = require('./executors');
 
-async function satisfier(stack, task, executors = defaultExecutors) {
-    console.log(`[satisfier] Satisfying task ${task} of ${stack.id}`);
+async function satisfier(stack, task) {
+    console.log(`[satisfier] Satisfying task ${task.name} of ${stack.id}`);
 
     if (executors[task.executor] === undefined) {
         throw new Error(
