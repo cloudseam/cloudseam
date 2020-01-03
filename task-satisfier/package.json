@@ -9,7 +9,7 @@
     "prettify": "prettier -l --write \"**/*.js\"",
     "serve": "node src/local.js",
     "test": "jest",
-    "test-watch": "jest --watch"
+    "test-watch": "jest --watchAll"
   },
   "dependencies": {
     "aws-sdk": "^2.356.0",
