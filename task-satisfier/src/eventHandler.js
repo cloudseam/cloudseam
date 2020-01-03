@@ -1,11 +1,7 @@
-const defaultResponseSender = require('./responseSender');
-const defaultSatisfier = require('./satisfier');
+const responseSender = require('./responseSender');
+const satisfier = require('./satisfier');
 
-async function eventHandler(
-    event,
-    satisfier = defaultSatisfier,
-    responseSender = defaultResponseSender,
-) {
+async function eventHandler(event) {
     try {
         await satisfier(event.stack, event.task);
         return responseSender.sendSuccess(event.stack.id, event.task);

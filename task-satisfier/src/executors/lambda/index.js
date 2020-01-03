@@ -1,6 +1,6 @@
-const defaultLambdaClient = require('../../aws').lambda;
+const lambdaClient = require('../../aws').lambda;
 
-async function lambdaExecutor(stack, task, lambdaClient = defaultLambdaClient) {
+async function lambdaExecutor(stack, task) {
     const payload = {
         stackId: stack.id,
         metadata: stack.metadata,
