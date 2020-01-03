@@ -64,8 +64,10 @@ async function eventHandler(eventRequest) {
     if (stack.state !== initialState && !stack.isSatisfied())
         await taskNotifier(stack, machine, t => t.status === 'PENDING');
 
-    if (stack.isSatisfied() && machine.isTerminalState(stack.state))
+    if (stack.isSatisfied() && machine.isTerminalState(stack.state)) {
         await repo.removeStack(stack);
+        console.log(`Stack ${stack.id} has been removed`);
+    }
 }
 
 module.exports = eventHandler;
