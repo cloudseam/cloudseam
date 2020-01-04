@@ -6,7 +6,7 @@ This repo contains the two functions for the state machine and task satisfier.
 
 ## Configuration
 
-The available configuration options for the functions are specified in the docs.
+The available configuration options for the functions are specified in the [docs](https://docs.cloudseam.app).
 
 
 ## Development
