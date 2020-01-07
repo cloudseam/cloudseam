@@ -1,6 +1,9 @@
 const lambdaClient = require('../../aws').lambda;
 
 async function lambdaExecutor(stack, task) {
+    if (process.env.LOCAL_MODE && process.env.SKIP_TASK_EXECUTION)
+        return;
+
     const payload = {
         stackId: stack.id,
         metadata: stack.metadata,
