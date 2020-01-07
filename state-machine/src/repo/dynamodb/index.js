@@ -22,6 +22,10 @@ class DynamoStackRepo {
     }
 
     async saveStack(stack) {
+        if (!stack.createdAt)
+            stack.createdAt = Date.now();
+        stack.updatedAt = Date.now();
+
         const params = {
             TableName,
             Item: stack,
