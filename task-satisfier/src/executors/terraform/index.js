@@ -12,6 +12,9 @@ const { s3 } = require('../../aws');
  * to the TF command
  */
 async function terraformExecutor(stack, task) {
+    if (process.env.LOCAL_MODE && process.env.SKIP_TASK_EXECUTION)
+        return;
+
     const tmpDir = tmp.dirSync({ unsafeCleanup: true });
     const workDir = tmpDir.name;
 
