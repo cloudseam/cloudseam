@@ -1,4 +1,5 @@
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const YAML = require('yamljs');
 const StateMachine = require('./stateMachine');
