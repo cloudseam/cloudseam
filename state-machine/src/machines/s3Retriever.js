@@ -37,7 +37,7 @@ async function getSourceFromS3(bucket, key, workDir) {
 async function getMachines() {
     const bucket = process.env.MACHINE_S3_BUCKET;
     const key = process.env.MACHINE_S3_KEY;
-    const dirName = fs.mkdtempSync(path.join(os.tmpdir(), 'machine-specs-');
+    const dirName = fs.mkdtempSync(path.join(os.tmpdir(), 'machine-specs-'));
     const files = await getSourceFromS3(bucket, key, dirName);
 
     return fs
