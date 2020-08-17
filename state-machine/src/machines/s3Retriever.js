@@ -6,9 +6,8 @@ const validateMachine = require('@cloudseam/machine-validator');
 const { s3 } = require('../aws');
 
 async function getSourceFromS3(bucket, key, workDir) {
-    fs.mkdirSync(workDir);
-
     console.log(`Using specs from bucket ${bucket} and key ${key}`);
+    console.log(`Caching in ${workDir}`);
     const objects = await s3
         .listObjectsV2({
             Bucket: bucket,
@@ -38,7 +37,7 @@ async function getSourceFromS3(bucket, key, workDir) {
 async function getMachines() {
     const bucket = process.env.MACHINE_S3_BUCKET;
     const key = process.env.MACHINE_S3_KEY;
-    const dirName = '/tmp/machine-specs';
+    const dirName = fs.mkdtempSync(path.join(os.tmpdir(), 'machine-specs-');
     const files = await getSourceFromS3(bucket, key, dirName);
 
     return fs
