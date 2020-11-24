@@ -9,8 +9,8 @@ async function lambdaExecutor(stack, task) {
         metadata: stack.metadata,
     };
 
-    if (task.args && typeof(task.args) === "object") {
-        payload.args = task.args
+    if (task.config.args && typeof(task.config.args) === "object") {
+        payload.args = task.config.args
     }
     
     const params = {
