@@ -5,7 +5,7 @@
 
 const fs = require('fs');
 const YAML = require('yamljs');
-const validator = require('./machines/validator');
+const validator = require('@cloudseam/machine-validator');
 
 if (process.argv.length < 3) {
     return exitWithError('Usage: node validate.js spec_directory');
