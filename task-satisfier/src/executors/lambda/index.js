@@ -9,6 +9,10 @@ async function lambdaExecutor(stack, task) {
         metadata: stack.metadata,
     };
 
+    if (task.config.args && typeof(task.config.args) === "object") {
+        payload.args = task.config.args
+    }
+    
     const params = {
         FunctionName: task.config.name,
         Payload: JSON.stringify(payload),
