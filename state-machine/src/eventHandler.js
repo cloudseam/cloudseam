@@ -26,6 +26,8 @@ async function eventHandler(eventRequest) {
         eventRequest.stackId,
         eventRequest.machine,
     );
+    if (!stack) return;
+    
     stack.addMetadata(eventRequest.metadata);
 
     const machine = await machineRetriever(stack.machine);
