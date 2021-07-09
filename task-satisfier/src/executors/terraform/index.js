@@ -102,7 +102,7 @@ async function init(workDir, stack, task) {
 
         const cmd = spawn(
             '/tmp/terraform',
-            ['init', `-backend-config="key=${key}"`, workDir],
+            ['init', '-no-color', `-backend-config="key=${key}"`, workDir],
             { shell: true, cwd: workDir },
         );
         cmd.stdout.on('data', data => log(data.toString()));
@@ -119,6 +119,7 @@ async function run(workDir, action, stackId, additionalVariables) {
         let options = [
             action,
             `-var='stack_id=${stackId}'`,
+            '-no-color',
             '-input=false',
             '-auto-approve',
         ];
