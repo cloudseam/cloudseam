@@ -22,9 +22,10 @@ async function stackLocator(stackId, machineName, repo = defaultRepo) {
 
     let stack = await repo.findStack(stackId);
     if (stack === undefined) {
-        if (machineName === undefined)
-            throw new Error('For a new stack, a "machine" is required');
-
+        if (machineName === undefined) {
+            console.warn("Stack", stackId, "not found and no 'machine' specified");
+            return;
+        }
         stack = new Stack(stackId, machineName);
     }
 
