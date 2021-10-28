@@ -17,12 +17,12 @@
     "@cloudseam/machine-validator": "^1.1.0",
     "@middy/core": "^2.5.2",
     "@middy/sqs-partial-batch-failure": "^2.5.2",
-    "aws-sdk": "^2.384.0",
     "joi": "^14.3.0",
     "pg": "^7.7.1",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "aws-sdk": "^2.384.0",
     "concurrently": "^4.0.1",
     "jest": "24.9.0",
     "nodemon": "2.0.2",
