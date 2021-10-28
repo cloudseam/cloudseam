@@ -352,6 +352,23 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
+"@middy/core@^2.5.2":
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/@middy/core/-/core-2.5.2.tgz#632985cba3a3a66548cc6bb0960efd49b9e2e5d5"
+  integrity sha512-Nho5E/2e8d9GSPr6IcQXV060lgwOgI2xPocdgjSJhtdkOKjy4vpGEFP7LNU8snUjZJyjDWI01hfq1Dy06lmNNw==
+
+"@middy/sqs-partial-batch-failure@^2.5.2":
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/@middy/sqs-partial-batch-failure/-/sqs-partial-batch-failure-2.5.2.tgz#c501ee4cc239c1ca654e1a684c378fc875cd03b5"
+  integrity sha512-Pyu313hrQLQxcoPWcAOXzwDE4/1Xhd7AoAFxOdqCcVkulZ73ibVuP3hfB7qmICquCEjuumxx1AmgEyf9xX6/+w==
+  dependencies:
+    "@middy/util" "^2.5.2"
+
+"@middy/util@^2.5.2":
+  version "2.5.2"
+  resolved "https://registry.yarnpkg.com/@middy/util/-/util-2.5.2.tgz#c4649d09687fc405fe24070ac678fff08e4f0ba9"
+  integrity sha512-dFvCbWqxpjtBCOTTguTSLCJC5FwoIC125G9f+Nl+4hAXwV2sNwZ7g0GH3T6MIvxjkHeqFYMxUm3ePjGTEYyxGg==
+
 "@types/babel__core@^7.1.0":
   version "7.1.12"
   resolved "https://registry.yarnpkg.com/@types/babel__core/-/babel__core-7.1.12.tgz#4d8e9e51eb265552a7e4f1ff2219ab6133bdfb2d"
